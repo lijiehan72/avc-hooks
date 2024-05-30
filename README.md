@@ -47,8 +47,10 @@ cacheAxios.get('http://127.0.0.1:8080/app', {
 
 ### 贡献与反馈
 
-欢迎提出问题、建议或贡献代码。如果你遇到任何问题，可以创建一个[新Issue](https://github.com/your-github-repo-name/avc-hooks/issues/new)。
+欢迎提出问题、建议或贡献代码。如果你遇到任何问题，可以创建一个[新Issue](https://github.com/lijiehan72/avc-hooks)。
+
 
 ### 许可
 
 [MIT License](https://choosealicense.com/licenses/mit/)
+
