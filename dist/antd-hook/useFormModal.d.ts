@@ -1,24 +1,25 @@
 import React from 'react';
+import type { FormProps } from 'antd';
 import { FormInstance } from 'antd';
 interface FormValues {
     id?: number;
+    [key: string]: any;
 }
 interface UseFormModalProps {
     title: React.ReactNode;
     content: React.ReactNode | ((form: FormInstance) => React.ReactNode);
-    mounted?: (data: any, form: FormInstance) => void;
+    mounted?: (data: boolean | FormValues, form: FormInstance) => void;
     unmount?: () => void;
     onOk: (values: FormValues) => Promise<{
         status: boolean;
         message?: string;
     }>;
-    formArgs?: Record<string, any>;
-    customRender?: boolean;
+    formArgs?: FormProps;
     [key: string]: any;
 }
-declare function UseFormModal({ title, content, mounted, unmount, onOk, formArgs, customRender, ...args }: UseFormModalProps, deps?: React.DependencyList): {
-    setOpen: React.Dispatch<React.SetStateAction<boolean | Record<string, any>>>;
+declare function UseFormModal({ title, content, mounted, unmount, onOk, formArgs, ...args }: UseFormModalProps, deps?: React.DependencyList): {
+    setOpen: React.Dispatch<React.SetStateAction<boolean | FormValues>>;
     form: FormInstance<any>;
-    getValues: () => any;
+    getValues: () => FormValues;
 };
 export default UseFormModal;

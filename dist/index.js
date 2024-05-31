@@ -27788,7 +27788,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 });
 
-var _excluded = ["title", "content", "mounted", "unmount", "onOk", "formArgs", "customRender"];
+var _excluded = ["title", "content", "mounted", "unmount", "onOk", "formArgs"];
 var common_modal = document.getElementById('common_modal');
 if (!common_modal) {
   common_modal = document.createElement('div');
@@ -27803,8 +27803,6 @@ function UseFormModal(_ref, deps) {
     onOk = _ref.onOk,
     _ref$formArgs = _ref.formArgs,
     formArgs = _ref$formArgs === void 0 ? {} : _ref$formArgs,
-    _ref$customRender = _ref.customRender,
-    customRender = _ref$customRender === void 0 ? false : _ref$customRender,
     args = _objectWithoutPropertiesLoose(_ref, _excluded);
   if (deps === void 0) {
     deps = [];
@@ -27860,7 +27858,6 @@ function UseFormModal(_ref, deps) {
     }
   }, [open, form, mounted]);
   React.useEffect(function () {
-    if (customRender) return;
     reactDom.render(React__default.createElement(antd.Modal, Object.assign({
       title: title,
       open: !!open,
@@ -27880,16 +27877,16 @@ function UseFormModal(_ref, deps) {
         span: 18
       }
     }, formArgs), React__default.createElement(antd.Form.Item, {
-      name: "id",
+      name: 'id',
       hidden: true
-    }), typeof content === "function" ? content(form) : content)), common_modal);
+    }), typeof content === 'function' ? content(form) : content)), common_modal);
     if (!open) {
       unmount && unmount();
       setTimeout(function () {
         reactDom.render(React__default.createElement("div", null), common_modal);
       }, 500);
     }
-  }, [customRender, loading, open, form].concat(deps));
+  }, [loading, open, form].concat(deps));
   return {
     setOpen: setOpen,
     form: form,

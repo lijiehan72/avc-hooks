@@ -27733,7 +27733,6 @@ function UseFormModal({
   unmount,
   onOk,
   formArgs = {},
-  customRender = false,
   ...args
 }, deps = []) {
   const [open, setOpen] = useState(false);
@@ -27775,7 +27774,6 @@ function UseFormModal({
     }
   }, [open, form, mounted]);
   useEffect(() => {
-    if (customRender) return;
     reactDom.render(React.createElement(Modal, Object.assign({
       title: title,
       open: !!open,
@@ -27793,16 +27791,16 @@ function UseFormModal({
         span: 18
       }
     }, formArgs), React.createElement(Form.Item, {
-      name: "id",
+      name: 'id',
       hidden: true
-    }), typeof content === "function" ? content(form) : content)), common_modal);
+    }), typeof content === 'function' ? content(form) : content)), common_modal);
     if (!open) {
       unmount && unmount();
       setTimeout(() => {
         reactDom.render(React.createElement("div", null), common_modal);
       }, 500);
     }
-  }, [customRender, loading, open, form, ...deps]);
+  }, [loading, open, form, ...deps]);
   return {
     setOpen,
     form,

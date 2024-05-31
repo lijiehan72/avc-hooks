@@ -20,17 +20,28 @@ interface FormValues {
     name: string;
     age: number;
 }
-// @ts-ignore
+
 const App = () => {
     useEffect(() => {
-        console.time('GET请求')
+        console.time('GET缓存请求')
         cacheAxios.get('http://127.0.0.1:8080/app', {
             params:{
                 name: 'avc',
             }
         }).then((res: any) => {
-            console.timeEnd('GET请求')
-            console.log("GET结果",res)
+            console.timeEnd('GET缓存请求')
+            console.log("GET缓存结果",res)
+        })
+        // 更新缓存
+        console.time('GET不读缓存')
+        cacheAxios.get('http://127.0.0.1:8080/app2', {
+            params:{
+                name: 'avc',
+                updateKey:true
+            }
+        }).then((res: any) => {
+            console.timeEnd('GET不读缓存')
+            console.log("GET不缓存结果",res)
         })
         console.time('POST请求')
         cacheAxios.post('http://127.0.0.1:8080/data', {}).then((res: any) => {
@@ -85,10 +96,7 @@ const App = () => {
         <ExampleComponent text="Create React Library Example 😄" />
         <Button
             onClick={() => {
-                testFormModal.setOpen({
-                    name: '张三',
-                    age: 20
-                })
+                testFormModal.setOpen(true)
             }}
         >新增</Button>
         <Button

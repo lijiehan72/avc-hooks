@@ -1,6 +1,6 @@
 # avc-hooks
 
-## 一个用于缓存axios数据的npm包
+## 介绍
 
 ### 安装
 
@@ -11,7 +11,9 @@ yarn add avc-hooks
 # 或者
 pnpm add avc-hooks
 ```
-### 使用
+# CacheRequest
+
+`CacheRequest` 缓存axios请求结果，减少重复请求，提高请求效率。
 
 ```javascript
 import axios from 'axios' 
