@@ -1,8 +1,8 @@
 import React from 'react';
 import cacheXHR from './request/cacheXHR';
+import useFormModal from './antd-hook/useFormModal';
 interface Props {
     text: string;
 }
 export declare const ExampleComponent: ({ text }: Props) => React.JSX.Element;
-export declare const cacheRequest: typeof cacheXHR;
-export {};
+export { cacheXHR as CacheRequest, useFormModal, };
