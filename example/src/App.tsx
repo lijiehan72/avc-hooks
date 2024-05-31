@@ -1,4 +1,4 @@
-import { CacheRequest, ExampleComponent,useFormModal } from 'avc-hooks'
+import { CacheRequest,useFormModal } from 'avc-hooks'
 import 'avc-hooks/dist/index.css'
 import React, { useEffect } from 'react'
 import axios from 'axios'
@@ -7,14 +7,10 @@ const cacheAxios = CacheRequest(axios,{
     updateKey:"updateKey", // 在请求中添加updateKey参数，当updateKey为true时，请求不会使用缓存，而是重新请求 默认：false
     cacheStore:"cacheStore" // 存储库名，默认：avc-cache
 })
-axios.interceptors.response.use(response=>{
+cacheAxios.interceptors.response.use(response=>{
     return response.data
 })
 
-export {
-    cacheAxios,
-    axios
-}
 interface FormValues {
     id?: number;
     name: string;
@@ -93,7 +89,6 @@ const App = () => {
         }
     })
     return <>
-        <ExampleComponent text="Create React Library Example 😄" />
         <Button
             onClick={() => {
                 testFormModal.setOpen(true)
