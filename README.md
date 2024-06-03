@@ -53,14 +53,14 @@ cacheAxios.get('http://127.0.0.1:8080/app', {
 
 ## Props
 
-| 属性名        | 类型                                               | 必填 | 默认值 | 说明                                                                                      |
-| ------------- | -------------------------------------------------- | ---- | ------ |-----------------------------------------------------------------------------------------|
-| title         | React.ReactNode                                    | 是   | -      | 弹窗标题                                                                                    |
-| content       | React.ReactNode \| ((form: FormInstance) => React.ReactNode) | 是   | -      | 表单内容，可以是 ReactNode 或一个函数，接收 `form` 作为参数返回 ReactNode                                     |
-| mounted       | (data: any, form: FormInstance) => void            | 否   | -      | 页面加载完成时的回调函数，接收两个参数 `data` 和 `form`，其中 `data` 为初始数据，`form` 为表单实例                        |
-| unmount       | () => void                                         | 否   | -      | 弹窗卸载之前执行的回调函数                                                                           |
+| 属性名        | 类型                                                                     | 必填 | 默认值 | 说明                                                                                      |
+| ------------- |------------------------------------------------------------------------| ---- | ------ |-----------------------------------------------------------------------------------------|
+| title         | React.ReactNode                                                        | 是   | -      | 弹窗标题                                                                                    |
+| content       | React.ReactNode \| ((form: FormInstance) => React.ReactNode)           | 是   | -      | 表单内容，可以是 ReactNode 或一个函数，接收 `form` 作为参数返回 ReactNode                                     |
+| mounted       | (data: any, form: FormInstance) => void                                | 否   | -      | 页面加载完成时的回调函数，接收两个参数 `data` 和 `form`，其中 `data` 为初始数据，`form` 为表单实例                        |
+| unmount       | () => void                                                             | 否   | -      | 弹窗卸载之前执行的回调函数                                                                           |
 | onOk          | (values: FormValues) => Promise<{ status: boolean, message?: string }> | 是   | -      | 点击确认按钮后的回调函数，接收表单收集的数据作为参数，返回一个 Promise，包含一个对象，其中 `status` 表示操作是否成功，`message` 表示操作结果的消息 |
-| formArgs      | Record<string, any>                                | 否   | {}     | 表单的额外参数配置，详情见 Antd Form 组件                                                              |
+| formArgs      | Antd.FormProps                                                         | 否   | {}     | 表单的额外参数配置，详情见 Antd Form 组件                                                              |
 
 
 ## 返回值
@@ -74,101 +74,21 @@ cacheAxios.get('http://127.0.0.1:8080/app', {
 ## 示例
 
 ```tsx
-import { CacheRequest,useFormModal } from 'avc-hooks'
-import 'avc-hooks/dist/index.css'
+//App:
 import React, { useEffect } from 'react'
-import axios from 'axios'
-import { Button, Form, Input, InputNumber } from 'antd'
-const cacheAxios = CacheRequest(axios,{
-    updateKey:"updateKey", // 在请求中添加updateKey参数，当updateKey为true时，请求不会使用缓存，而是重新请求 默认：false
-    cacheStore:"cacheStore" // 存储库名，默认：avc-cache
-})
-// 自定义拦截器
-cacheAxios.interceptors.response.use(response=>{
-    return response.data
-})
-
-interface FormValues {
-    id?: number;
-    name: string;
-    age: number;
-}
-
+import { CacheRequest } from 'avc-hooks'
+import useModal from './useModal'
 const App = () => {
-    useEffect(() => {
-        console.time('GET缓存请求')
-        cacheAxios.get('http://127.0.0.1:8080/app', {
-            params:{
-                name: 'avc',
-            }
-        }).then((res: any) => {
-            console.timeEnd('GET缓存请求')
-            console.log("GET缓存结果",res)
-        })
-        // 更新缓存
-        console.time('GET不读缓存')
-        cacheAxios.get('http://127.0.0.1:8080/app2', {
-            params:{
-                name: 'avc',
-                updateKey:true
-            }
-        }).then((res: any) => {
-            console.timeEnd('GET不读缓存')
-            console.log("GET不缓存结果",res)
-        })
-        console.time('POST请求')
-        cacheAxios.post('http://127.0.0.1:8080/data', {}).then((res: any) => {
-            console.timeEnd('POST请求')
-            console.log("POST结果",res)
-        })
-    }, [])
-    const content = <>
-        <Form.Item
-            label={"姓名"}
-            name={"name"}
-        >
-            <Input placeholder={"请输入姓名"} />
-        </Form.Item>
-        <Form.Item
-            label={"年龄"}
-            name={"age"}
-        >
-            <InputNumber placeholder={"请输入年龄"} />
-        </Form.Item>
-    </>
-    const testFormModal = useFormModal({
-        title: '创建弹窗',
-        content,
-        onOk(values: FormValues){
-            return cacheAxios.post('http://127.0.0.1:8080/data', values).then(() => {
-                return {
-                    status: true,
-                    message: "创建成功"
-                }
-            })
-        }
-    },[]);
-    const updateModal = useFormModal({
-        title: '编辑弹窗',
-        content,
-        onOk(values:FormValues){
-            return cacheAxios.post('http://127.0.0.1:8080/data', values).then(() => {
-                return {
-                    status: true,
-                    message: "修改成功"
-                }
-            }).catch(() => {
-                return {
-                    status: false,
-                    message: "修改失败"
-                }
-            })
-        }
-    })
+
+    const {
+        createModal,
+        updateModal
+    } = useModal();
+
     return <>
         <Button
             onClick={() => {
-                testFormModal.setOpen(true)
+                createModal.setOpen(true)
             }}
         >新增</Button>
         <Button
@@ -184,6 +104,87 @@ const App = () => {
 }
 
 export default App
+// useModal.tsx
+import React, { useEffect, useState } from 'react'
+import {useFormModal} from "avc-hooks"
+import { Form, Input, InputNumber, Select } from 'antd'
+import { cacheAxios } from './App'
+import type { UseFormModalReturnType } from 'avc-hooks'
+interface FormValues {
+    id?: number;
+    name: string;
+    age: number;
+}
+interface Option {
+    value: string | number;
+    label: string;
+}
+type ModalReturnTypeDictionary = {
+    [key: string]: UseFormModalReturnType;
+};
+function UseModal(): ModalReturnTypeDictionary {
+    const [options, setOptions] = useState<Option[]|[]>([])
+    useEffect(() => {
+        setTimeout(()=>{
+            setOptions([
+                {label:"唱",value:"唱"},
+                {label:"跳",value:"跳"},
+                {label:"rap",value:"rap"},
+                {label:"篮球",value:"篮球"}
+            ])
+        },5000)
+    }, [])
+    const content = <>
+        <Form.Item
+            label={"姓名"}
+            name={"name"}
+        >
+            <Input placeholder={"请输入姓名"} />
+        </Form.Item>
+        <Form.Item
+            label={"年龄"}
+            name={"age"}
+        >
+            <InputNumber placeholder={"请输入年龄"} />
+        </Form.Item>
+        <Form.Item
+            label={"测试下拉框"}
+            name={"test"}
+        >
+            <Select options={options} />
+        </Form.Item>
+    </>
+    const createModal = useFormModal({
+        title: '创建弹窗',
+        content,
+        onOk(values: FormValues){
+            return cacheAxios.post('http://127.0.0.1:8080/data', values).then(() => {
+                return {
+                    status: true,
+                    message: "创建成功"
+                }
+            })
+        }
+    },[options])
+    const updateModal = useFormModal({
+        title: '编辑弹窗',
+        content,
+        onOk(values: FormValues) {
+            return cacheAxios.post('http://127.0.0.1:8080/data', values).then(()=>{
+                return {
+                    status: true,
+                    message: "编辑成功"
+                };
+            })
+        },
+    },[options])
+    return {
+        createModal,
+        updateModal
+    }
+}
+
+export default UseModal
 
 ```
 

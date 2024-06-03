@@ -1,29 +1,30 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import ReactDOM from 'react-dom'
-import type { FormProps } from 'antd'
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import type { FormProps,ModalProps } from 'antd'
 import { Form, FormInstance, message, Modal } from 'antd'
 import _ from 'lodash'
+import { createRoot } from 'react-dom/client'
 
 interface FormValues {
     id?: number;
     [key: string]: any;
 }
-
+export type OnOkResult = {
+    status: boolean;
+    message?: string;
+};
+export type UseFormModalReturnType = {
+    setOpen: (value: boolean | FormValues) => void;
+    form: FormInstance<FormValues>;
+    getValues: () => FormValues;
+};
 interface UseFormModalProps {
     title: React.ReactNode; // 标题
     content: React.ReactNode | ((form: FormInstance) => React.ReactNode); // 表单内容
     mounted?: (data: boolean | FormValues, form: FormInstance) => void; // 页面加载完成
     unmount?: () => void; // 弹窗卸载之前执行
-    onOk: (values: FormValues) => Promise<{ status: boolean, message?: string }>; // 点击确认按钮后的回调
+    onOk: (values: FormValues) => Promise<OnOkResult>; // 点击确认按钮后的回调
     formArgs?: FormProps;
-    [key: string]: any;
-}
-
-let common_modal = document.getElementById('common_modal')
-if (!common_modal) {
-    common_modal = document.createElement('div')
-    common_modal.id = '_common_modal'
-    document.body.appendChild(common_modal)
+    args?:ModalProps;
 }
 
 function UseFormModal({
@@ -34,12 +35,22 @@ function UseFormModal({
                           onOk,
                           formArgs = {},
                           ...args
-                      }: UseFormModalProps, deps: React.DependencyList = []) {
+                      }: UseFormModalProps, deps: React.DependencyList = []):UseFormModalReturnType {
 
     const [open, setOpen] = useState<boolean | FormValues>(false)
     const [loading, setLoading] = useState<boolean>(false)
-    const [form] = Form.useForm()
-
+    const [form] = Form.useForm();
+    const mid = useId()
+    const container = useMemo(()=>{
+        let common_modal = document.getElementById('_common_modal'+mid);
+        if (!common_modal) {
+            common_modal = document.createElement('div')
+            common_modal.id = '_common_modal'+mid
+            document.body.appendChild(common_modal)
+        }
+        console.log(111)
+        return createRoot(common_modal)
+    },[mid])
     const handleOk = useCallback(async () => {
         try {
             const values = await form.validateFields()
@@ -65,6 +76,7 @@ function UseFormModal({
     const onClose = useCallback(() => {
         setOpen(false)
         setLoading(false)
+        form.resetFields()
         unmount && unmount()
     }, [unmount])
 
@@ -72,14 +84,11 @@ function UseFormModal({
         if (open === true) return
         if (open && typeof open === 'object') {
             mounted ? mounted(open, form) : form.setFieldsValue(open)
-        } else {
-            form.resetFields()
-            setLoading(false)
         }
     }, [open, form, mounted])
 
     useEffect(() => {
-        ReactDOM.render(
+        container.render(
             <Modal
                 title={title}
                 open={!!open}
@@ -87,23 +96,22 @@ function UseFormModal({
                 onCancel={onClose}
                 confirmLoading={loading}
                 maskClosable={false}
-                getContainer={() => common_modal as HTMLElement}
+                getContainer={() => document.getElementById('_common_modal'+mid) as HTMLElement}
                 {...args}
             >
                 <Form form={form} labelCol={{ span: 4 }} wrapperCol={{ span: 18 }} {...formArgs}>
-                    <Form.Item name={'id'} hidden={true} />
+                    <Form.Item name={'id'} label={"id"} hidden={true} ><div /></Form.Item>
                     {typeof content === 'function' ? content(form) : content}
                 </Form>
-            </Modal>,
-            common_modal
+            </Modal>
         )
         if (!open) {
             unmount && unmount()
             setTimeout(() => {
-                ReactDOM.render(<div />, common_modal)
+                container.render(<div />)
             }, 500)
         }
-    }, [loading, open, form, ...deps])
+    }, [loading, mid,open, form, ...deps])
 
     return {
         setOpen,
