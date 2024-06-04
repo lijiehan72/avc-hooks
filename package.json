@@ -1,6 +1,6 @@
 {
   "name": "avc-hooks",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Made with create-react-library",
   "author": "",
   "license": "MIT",
@@ -54,6 +54,7 @@
     "antd": "^5.17.4",
     "dayjs": "^1.11.11",
     "fetch-api": "^0.0.2",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "react-router-dom": "^6.23.1"
   }
 }

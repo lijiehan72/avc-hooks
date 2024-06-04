@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {useFormModal} from "avc-hooks"
-import { Form, Input, InputNumber, Select } from 'antd'
-import { cacheAxios } from './App'
+import { Button, Form, Input, InputNumber, Select } from 'antd'
+import { cacheAxios } from '../utils/request'
 import type { UseFormModalReturnType } from 'avc-hooks'
 interface FormValues {
     id?: number;
@@ -71,10 +71,53 @@ function UseModal(): ModalReturnTypeDictionary {
             })
         },
     },[options])
+    const delModal = useFormModal({
+        title: '删除',
+        content:'确定删除吗？',
+        onOk(values: FormValues) {
+            return cacheAxios.post('http://127.0.0.1:8080/data', values).then(()=>{
+                return {
+                    status: true,
+                    message: "删除成功"
+                };
+            })
+        },
+    },[options])
     return {
         createModal,
-        updateModal
+        updateModal,
+        delModal
     }
 }
 
-export default UseModal
+export default function(){
+    const {createModal,updateModal,delModal} = UseModal()
+    return <>
+        <Button
+            onClick={() => {
+                createModal.setOpen(true)
+            }}
+            type={"primary"}
+        >新增</Button>
+        <Button
+            onClick={() => {
+                updateModal.setOpen({
+                    id: 1,
+                    name: '张三',
+                    age: 20
+                })
+            }}
+        >编辑</Button>
+        <Button
+            type={'primary'}
+            danger={true}
+            onClick={() => {
+                delModal.setOpen({
+                    id: 1
+                })
+            }}
+        >
+            删除
+        </Button>
+    </>
+}

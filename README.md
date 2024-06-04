@@ -104,6 +104,8 @@ const App = () => {
 }
 
 export default App
+```
+```tsx
 // useModal.tsx
 import React, { useEffect, useState } from 'react'
 import {useFormModal} from "avc-hooks"

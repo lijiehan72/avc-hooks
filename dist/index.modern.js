@@ -2,101 +2,55 @@ import React, { useState, useId, useMemo, useCallback, useEffect } from 'react';
 import { Form, message, Modal } from 'antd';
 import _ from 'lodash';
 
-function _extends() {
-  return _extends = Object.assign ? Object.assign.bind() : function (n) {
-    for (var e = 1; e < arguments.length; e++) {
-      var t = arguments[e];
-      for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]);
-    }
-    return n;
-  }, _extends.apply(null, arguments);
-}
-function _objectWithoutPropertiesLoose(r, e) {
-  if (null == r) return {};
-  var t = {};
-  for (var n in r) if ({}.hasOwnProperty.call(r, n)) {
-    if (e.indexOf(n) >= 0) continue;
-    t[n] = r[n];
-  }
-  return t;
-}
-
-function XHR(axios, cacheConfig) {
-  if (cacheConfig === void 0) {
-    cacheConfig = {};
-  }
-  cacheConfig = _extends({
+function XHR(axios, cacheConfig = {}) {
+  cacheConfig = {
     cacheStore: 'avc-cache',
-    updateKey: 'updateKey'
-  }, cacheConfig);
-  var cache = null;
-  axios.interceptors.request.use(function (config) {
-    try {
-      var _config$method;
-      var _temp3 = function _temp3() {
-        return Promise.resolve(cache.match(cacheKey)).then(function (response) {
-          var _exit = false;
-          var _temp = function () {
-            if (response && !update) {
-              return Promise.resolve(response.json()).then(function (rr) {
-                var _Promise$reject = Promise.reject({
-                  cacheData: rr
-                });
-                _exit = true;
-                return _Promise$reject;
-              });
-            }
-          }();
-          return _temp && _temp.then ? _temp.then(function (_result) {
-            return _exit ? _result : config;
-          }) : _exit ? _temp : config;
-        });
-      };
-      if (((_config$method = config.method) === null || _config$method === void 0 ? void 0 : _config$method.toLowerCase()) !== 'get') {
-        return Promise.resolve(config);
-      }
-      var cacheKey = config.url || '';
-      var update = false;
-      if (config.params) {
-        var params = config.params;
-        var updateKey = cacheConfig.updateKey;
-        if (updateKey && params[updateKey]) {
-          update = params[updateKey];
-          delete params[updateKey];
-        }
-        cacheKey += '?' + new URLSearchParams(params).toString();
-      }
-      var _temp2 = function () {
-        if (cache === null) {
-          return Promise.resolve(caches.open(cacheConfig.cacheStore)).then(function (_caches$open) {
-            cache = _caches$open;
-          });
-        }
-      }();
-      return Promise.resolve(_temp2 && _temp2.then ? _temp2.then(_temp3) : _temp3(_temp2));
-    } catch (e) {
-      return Promise.reject(e);
+    updateKey: 'updateKey',
+    ...cacheConfig
+  };
+  let cache = null;
+  axios.interceptors.request.use(async config => {
+    var _config$method;
+    if (((_config$method = config.method) === null || _config$method === void 0 ? void 0 : _config$method.toLowerCase()) !== 'get') {
+      return config;
     }
-  }, function (error) {
+    let cacheKey = config.url || '';
+    let update = false;
+    if (config.params) {
+      const params = config.params;
+      const updateKey = cacheConfig.updateKey;
+      if (updateKey && params[updateKey]) {
+        update = params[updateKey];
+        delete params[updateKey];
+      }
+      cacheKey += '?' + new URLSearchParams(params).toString();
+    }
+    if (cache === null) {
+      cache = await caches.open(cacheConfig.cacheStore);
+    }
+    const response = await cache.match(cacheKey);
+    if (response && !update) {
+      const rr = await response.json();
+      return Promise.reject({
+        cacheData: rr
+      });
+    }
+    return config;
+  }, error => {
     return Promise.reject(error);
   });
-  axios.interceptors.response.use(function (response) {
-    try {
-      var _response$config$meth;
-      if (((_response$config$meth = response.config.method) === null || _response$config$meth === void 0 ? void 0 : _response$config$meth.toLowerCase()) !== 'get') {
-        return Promise.resolve(response);
-      }
-      var cacheKey = response.config.url || '';
-      if (response.config.params) {
-        cacheKey += '?' + new URLSearchParams(response.config.params).toString();
-      }
-      return Promise.resolve(cache.put(cacheKey, new Response(JSON.stringify(response)))).then(function () {
-        return response;
-      });
-    } catch (e) {
-      return Promise.reject(e);
+  axios.interceptors.response.use(async response => {
+    var _response$config$meth;
+    if (((_response$config$meth = response.config.method) === null || _response$config$meth === void 0 ? void 0 : _response$config$meth.toLowerCase()) !== 'get') {
+      return response;
     }
-  }, function (error) {
+    let cacheKey = response.config.url || '';
+    if (response.config.params) {
+      cacheKey += '?' + new URLSearchParams(response.config.params).toString();
+    }
+    await cache.put(cacheKey, new Response(JSON.stringify(response)));
+    return response;
+  }, error => {
     if (error.cacheData) {
       return Promise.resolve(error.cacheData);
     }
@@ -105,26 +59,7 @@ function XHR(axios, cacheConfig) {
   return axios;
 }
 
-var styles = {"test":"_3ybTi"};
-
-// A type of promise-like that resolves synchronously and supports only one observer
-
-const _iteratorSymbol = /*#__PURE__*/ typeof Symbol !== "undefined" ? (Symbol.iterator || (Symbol.iterator = Symbol("Symbol.iterator"))) : "@@iterator";
-
-const _asyncIteratorSymbol = /*#__PURE__*/ typeof Symbol !== "undefined" ? (Symbol.asyncIterator || (Symbol.asyncIterator = Symbol("Symbol.asyncIterator"))) : "@@asyncIterator";
-
-// Asynchronously call a function and send errors to recovery continuation
-function _catch(body, recover) {
-	try {
-		var result = body();
-	} catch(e) {
-		return recover(e);
-	}
-	if (result && result.then) {
-		return result.then(void 0, recover);
-	}
-	return result;
-}
+var styles = {"test":"_styles-module__test__3ybTi"};
 
 function createCommonjsModule(fn, module) {
 	return module = { exports: {} }, fn(module, module.exports), module.exports;
@@ -31061,30 +30996,21 @@ if (process.env.NODE_ENV === 'production') {
 });
 var client_1 = client.createRoot;
 
-var _excluded = ["title", "content", "mounted", "unmount", "onOk", "formArgs"];
-function UseFormModal(_ref, deps) {
-  var title = _ref.title,
-    content = _ref.content,
-    mounted = _ref.mounted,
-    unmount = _ref.unmount,
-    onOk = _ref.onOk,
-    _ref$formArgs = _ref.formArgs,
-    formArgs = _ref$formArgs === void 0 ? {} : _ref$formArgs,
-    args = _objectWithoutPropertiesLoose(_ref, _excluded);
-  if (deps === void 0) {
-    deps = [];
-  }
-  var _useState = useState(false),
-    open = _useState[0],
-    setOpen = _useState[1];
-  var _useState2 = useState(false),
-    loading = _useState2[0],
-    setLoading = _useState2[1];
-  var _Form$useForm = Form.useForm(),
-    form = _Form$useForm[0];
-  var mid = useId();
-  var container = useMemo(function () {
-    var common_modal = document.getElementById('_common_modal' + mid);
+function UseFormModal({
+  title,
+  content,
+  mounted,
+  unmount,
+  onOk,
+  formArgs = {},
+  ...args
+}, deps = []) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
+  const mid = useId();
+  const container = useMemo(() => {
+    let common_modal = document.getElementById('_common_modal' + mid);
     if (!common_modal) {
       common_modal = document.createElement('div');
       common_modal.id = '_common_modal' + mid;
@@ -31093,47 +31019,40 @@ function UseFormModal(_ref, deps) {
     console.log(111);
     return client_1(common_modal);
   }, [mid]);
-  var handleOk = useCallback(function () {
+  const handleOk = useCallback(async () => {
     try {
-      var _temp = _catch(function () {
-        return Promise.resolve(form.validateFields()).then(function (values) {
-          if (values.id === undefined) {
-            delete values.id;
-          }
-          setLoading(true);
-          var valueBk = _.cloneDeep(values);
-          return Promise.resolve(onOk(valueBk)).then(function (result) {
-            if (result.status) {
-              onClose();
-              result.message && message.success(result.message);
-            } else {
-              message.error(result.message);
-              setLoading(false);
-            }
-          });
-        });
-      }, function (err) {
-        console.error(err);
+      const values = await form.validateFields();
+      if (values.id === undefined) {
+        delete values.id;
+      }
+      setLoading(true);
+      const valueBk = _.cloneDeep(values);
+      const result = await onOk(valueBk);
+      if (result.status) {
+        onClose();
+        result.message && message.success(result.message);
+      } else {
+        message.error(result.message);
         setLoading(false);
-      });
-      return Promise.resolve(_temp && _temp.then ? _temp.then(function () {}) : void 0);
-    } catch (e) {
-      return Promise.reject(e);
+      }
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
     }
   }, [onOk, form]);
-  var onClose = useCallback(function () {
+  const onClose = useCallback(() => {
     setOpen(false);
     setLoading(false);
     form.resetFields();
     unmount && unmount();
   }, [unmount]);
-  useEffect(function () {
+  useEffect(() => {
     if (open === true) return;
     if (open && typeof open === 'object') {
       mounted ? mounted(open, form) : form.setFieldsValue(open);
     }
   }, [open, form, mounted]);
-  useEffect(function () {
+  useEffect(() => {
     container.render(React.createElement(Modal, Object.assign({
       title: title,
       open: !!open,
@@ -31141,9 +31060,7 @@ function UseFormModal(_ref, deps) {
       onCancel: onClose,
       confirmLoading: loading,
       maskClosable: false,
-      getContainer: function getContainer() {
-        return document.getElementById('_common_modal' + mid);
-      }
+      getContainer: () => document.getElementById('_common_modal' + mid)
     }, args), React.createElement(Form, Object.assign({
       form: form,
       labelCol: {
@@ -31159,22 +31076,21 @@ function UseFormModal(_ref, deps) {
     }, React.createElement("div", null)), typeof content === 'function' ? content(form) : content)));
     if (!open) {
       unmount && unmount();
-      setTimeout(function () {
+      setTimeout(() => {
         container.render(React.createElement("div", null));
       }, 500);
     }
-  }, [loading, mid, open, form].concat(deps));
+  }, [loading, mid, open, form, ...deps]);
   return {
-    setOpen: setOpen,
-    form: form,
-    getValues: function getValues() {
-      return form.getFieldsValue();
-    }
+    setOpen,
+    form,
+    getValues: () => form.getFieldsValue()
   };
 }
 
-var ExampleComponent = function ExampleComponent(_ref) {
-  var text = _ref.text;
+const ExampleComponent = ({
+  text
+}) => {
   return React.createElement("div", {
     className: styles.test
   }, "Example Component: ", text);

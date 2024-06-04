@@ -108,7 +108,7 @@ function XHR(axios, cacheConfig) {
   return axios;
 }
 
-var styles = {"test":"_3ybTi"};
+var styles = {"test":"_styles-module__test__3ybTi"};
 
 // A type of promise-like that resolves synchronously and supports only one observer
 
